@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: Sift — API Gateway + Lambda functions (C#)
+Description: Sift — API Gateway, C# Lambda functions, and Python document pipeline
 
 Parameters:
   Env:
@@ -49,6 +49,9 @@ Resources:
             Status: Enabled
             AbortIncompleteMultipartUpload:
               DaysAfterInitiation: 1
+      NotificationConfiguration:
+        EventBridgeConfiguration:
+          EventBridgeEnabled: true
 
   # ── API Gateway HTTP API ──────────────────────────────────────────────────────
 
@@ -196,6 +199,313 @@ Resources:
             Method: PUT
             Path: /tenants/users/{id}/role
 
+  # ── Pipeline: Shared Lambda Layer ────────────────────────────────────────────
+
+  PipelineSharedLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: !Sub sift-pipeline-shared-${Env}
+      ContentUri: ../backend/pipeline/layers/shared/
+      CompatibleRuntimes: [python3.12]
+      RetentionPolicy: Delete
+
+  # ── Pipeline: Python Lambda Functions ────────────────────────────────────────
+
+  ExtractTextFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub sift-extract-${Env}
+      CodeUri: ../backend/pipeline/extract/
+      Handler: extract_handler.handler
+      Runtime: python3.12
+      Architectures: [x86_64]   # psycopg2-binary ships x86_64 wheels
+      MemorySize: 1024
+      Timeout: 120
+      Layers: [!Ref PipelineSharedLayer]
+      Environment:
+        Variables:
+          DB_SECRET_ARN:  !ImportValue { Fn::Sub: "sift-${Env}-DBSecretArn" }
+          DB_HOST:        !ImportValue { Fn::Sub: "sift-${Env}-DBEndpoint" }
+          DB_PORT:        !ImportValue { Fn::Sub: "sift-${Env}-DBPort" }
+          DB_NAME:        sift
+          UPLOADS_BUCKET: !Ref UploadsBucket
+          AWS_REGION_NAME: !Ref AWS::Region
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - !Sub arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess
+        - Statement:
+            - Effect: Allow
+              Action: secretsmanager:GetSecretValue
+              Resource: !ImportValue { Fn::Sub: "sift-${Env}-DBSecretArn" }
+
+  ChunkTextFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub sift-chunk-${Env}
+      CodeUri: ../backend/pipeline/chunk/
+      Handler: chunk_handler.handler
+      Runtime: python3.12
+      Architectures: [x86_64]
+      MemorySize: 512
+      Timeout: 60
+      Layers: [!Ref PipelineSharedLayer]
+      Environment:
+        Variables:
+          AWS_REGION_NAME: !Ref AWS::Region
+
+  EmbedChunkFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub sift-embed-${Env}
+      CodeUri: ../backend/pipeline/embed/
+      Handler: embed_handler.handler
+      Runtime: python3.12
+      Architectures: [x86_64]
+      MemorySize: 512
+      Timeout: 60
+      Layers: [!Ref PipelineSharedLayer]
+      Environment:
+        Variables:
+          DB_SECRET_ARN:   !ImportValue { Fn::Sub: "sift-${Env}-DBSecretArn" }
+          DB_HOST:         !ImportValue { Fn::Sub: "sift-${Env}-DBEndpoint" }
+          DB_PORT:         !ImportValue { Fn::Sub: "sift-${Env}-DBPort" }
+          DB_NAME:         sift
+          AWS_REGION_NAME: !Ref AWS::Region
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - Statement:
+            - Effect: Allow
+              Action: secretsmanager:GetSecretValue
+              Resource: !ImportValue { Fn::Sub: "sift-${Env}-DBSecretArn" }
+            - Effect: Allow
+              Action: bedrock:InvokeModel
+              Resource: !Sub arn:aws:bedrock:${AWS::Region}::foundation-model/amazon.titan-embed-text-v2:0
+
+  ExtractMetadataFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub sift-metadata-${Env}
+      CodeUri: ../backend/pipeline/metadata/
+      Handler: metadata_handler.handler
+      Runtime: python3.12
+      Architectures: [x86_64]
+      MemorySize: 512
+      Timeout: 60
+      Layers: [!Ref PipelineSharedLayer]
+      Environment:
+        Variables:
+          DB_SECRET_ARN:   !ImportValue { Fn::Sub: "sift-${Env}-DBSecretArn" }
+          DB_HOST:         !ImportValue { Fn::Sub: "sift-${Env}-DBEndpoint" }
+          DB_PORT:         !ImportValue { Fn::Sub: "sift-${Env}-DBPort" }
+          DB_NAME:         sift
+          AWS_REGION_NAME: !Ref AWS::Region
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - Statement:
+            - Effect: Allow
+              Action: secretsmanager:GetSecretValue
+              Resource: !ImportValue { Fn::Sub: "sift-${Env}-DBSecretArn" }
+            - Effect: Allow
+              Action: bedrock:InvokeModel
+              Resource: !Sub arn:aws:bedrock:${AWS::Region}::foundation-model/anthropic.claude-3-haiku-20240307-v1:0
+
+  MarkReadyFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub sift-mark-ready-${Env}
+      CodeUri: ../backend/pipeline/mark_ready/
+      Handler: mark_ready_handler.handler
+      Runtime: python3.12
+      Architectures: [x86_64]
+      MemorySize: 256
+      Timeout: 30
+      Layers: [!Ref PipelineSharedLayer]
+      Environment:
+        Variables:
+          DB_SECRET_ARN:   !ImportValue { Fn::Sub: "sift-${Env}-DBSecretArn" }
+          DB_HOST:         !ImportValue { Fn::Sub: "sift-${Env}-DBEndpoint" }
+          DB_PORT:         !ImportValue { Fn::Sub: "sift-${Env}-DBPort" }
+          DB_NAME:         sift
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - Statement:
+            - Effect: Allow
+              Action: secretsmanager:GetSecretValue
+              Resource: !ImportValue { Fn::Sub: "sift-${Env}-DBSecretArn" }
+
+  MarkFailedFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub sift-mark-failed-${Env}
+      CodeUri: ../backend/pipeline/mark_failed/
+      Handler: mark_failed_handler.handler
+      Runtime: python3.12
+      Architectures: [x86_64]
+      MemorySize: 256
+      Timeout: 30
+      Layers: [!Ref PipelineSharedLayer]
+      Environment:
+        Variables:
+          DB_SECRET_ARN:   !ImportValue { Fn::Sub: "sift-${Env}-DBSecretArn" }
+          DB_HOST:         !ImportValue { Fn::Sub: "sift-${Env}-DBEndpoint" }
+          DB_PORT:         !ImportValue { Fn::Sub: "sift-${Env}-DBPort" }
+          DB_NAME:         sift
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - Statement:
+            - Effect: Allow
+              Action: secretsmanager:GetSecretValue
+              Resource: !ImportValue { Fn::Sub: "sift-${Env}-DBSecretArn" }
+
+  # ── Step Functions State Machine ─────────────────────────────────────────────
+
+  PipelineStateMachineRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub sift-pipeline-sfn-${Env}
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: states.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: InvokePipelineLambdas
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: lambda:InvokeFunction
+                Resource:
+                  - !GetAtt ExtractTextFunction.Arn
+                  - !GetAtt ChunkTextFunction.Arn
+                  - !GetAtt EmbedChunkFunction.Arn
+                  - !GetAtt ExtractMetadataFunction.Arn
+                  - !GetAtt MarkReadyFunction.Arn
+                  - !GetAtt MarkFailedFunction.Arn
+
+  PipelineStateMachine:
+    Type: AWS::Serverless::StateMachine
+    Properties:
+      Name: !Sub sift-pipeline-${Env}
+      Type: EXPRESS
+      Role: !GetAtt PipelineStateMachineRole.Arn
+      Definition:
+        Comment: Sift document ingestion pipeline
+        StartAt: ExtractText
+        States:
+          ExtractText:
+            Type: Task
+            Resource: !GetAtt ExtractTextFunction.Arn
+            Retry:
+              - ErrorEquals: [States.TaskFailed]
+                IntervalSeconds: 2
+                MaxAttempts: 2
+            Catch:
+              - ErrorEquals: [States.ALL]
+                ResultPath: $.error
+                Next: MarkFailed
+            Next: ChunkText
+
+          ChunkText:
+            Type: Task
+            Resource: !GetAtt ChunkTextFunction.Arn
+            Catch:
+              - ErrorEquals: [States.ALL]
+                ResultPath: $.error
+                Next: MarkFailed
+            Next: GenerateEmbeddings
+
+          GenerateEmbeddings:
+            Type: Map
+            ItemsPath: $.chunks
+            Parameters:
+              documentId.$: $.documentId
+              tenantId.$:   $.tenantId
+              index.$:      $$.Map.Item.Value.index
+              content.$:    $$.Map.Item.Value.content
+            MaxConcurrency: 5
+            ResultPath: $.embeddingResults
+            Iterator:
+              StartAt: EmbedChunk
+              States:
+                EmbedChunk:
+                  Type: Task
+                  Resource: !GetAtt EmbedChunkFunction.Arn
+                  Retry:
+                    - ErrorEquals: [States.TaskFailed]
+                      IntervalSeconds: 2
+                      MaxAttempts: 3
+                  End: true
+            Catch:
+              - ErrorEquals: [States.ALL]
+                ResultPath: $.error
+                Next: MarkFailed
+            Next: ExtractMetadata
+
+          ExtractMetadata:
+            Type: Task
+            Resource: !GetAtt ExtractMetadataFunction.Arn
+            Catch:
+              - ErrorEquals: [States.ALL]
+                ResultPath: $.error
+                Next: MarkFailed
+            Next: MarkReady
+
+          MarkReady:
+            Type: Task
+            Resource: !GetAtt MarkReadyFunction.Arn
+            End: true
+
+          MarkFailed:
+            Type: Task
+            Resource: !GetAtt MarkFailedFunction.Arn
+            End: true
+
+  # ── EventBridge: S3 upload → Step Functions ───────────────────────────────────
+
+  EventBridgeToSfnRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub sift-eventbridge-sfn-${Env}
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: events.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: StartPipelineExecution
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: states:StartExecution
+                Resource: !Ref PipelineStateMachine
+
+  S3UploadRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Name: !Sub sift-s3-upload-${Env}
+      Description: Trigger document pipeline on S3 object created
+      EventPattern:
+        source: [aws.s3]
+        detail-type: [Object Created]
+        detail:
+          bucket:
+            name: [!Ref UploadsBucket]
+      Targets:
+        - Id: TriggerPipeline
+          Arn: !Ref PipelineStateMachine
+          RoleArn: !GetAtt EventBridgeToSfnRole.Arn
+          InputTransformer:
+            InputPathsMap:
+              key:    "$.detail.object.key"
+              bucket: "$.detail.bucket.name"
+            InputTemplate: '{"s3Key": "<key>", "bucketName": "<bucket>"}'
+
 Outputs:
   ApiUrl:
     Value: !Sub https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com/${Env}
@@ -205,3 +515,7 @@ Outputs:
     Value: !Ref UploadsBucket
     Export:
       Name: !Sub sift-${Env}-UploadsBucket
+  PipelineStateMachineArn:
+    Value: !Ref PipelineStateMachine
+    Export:
+      Name: !Sub sift-${Env}-PipelineArn

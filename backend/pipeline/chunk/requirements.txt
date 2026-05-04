@@ -1,0 +1,2 @@
+# No third-party dependencies — stdlib only
+boto3==1.34.*
