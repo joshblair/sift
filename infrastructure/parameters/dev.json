@@ -1,0 +1,4 @@
+[
+  { "ParameterKey": "Env", "ParameterValue": "dev" },
+  { "ParameterKey": "EnableNatGateway", "ParameterValue": "false" }
+]

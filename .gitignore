@@ -1,0 +1,38 @@
+# AWS SAM
+.aws-sam/
+samconfig.toml
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+
+# .NET / C#
+bin/
+obj/
+*.user
+*.suo
+.vs/
+
+# Node / Frontend
+node_modules/
+dist/
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# AWS credentials / secrets — never commit these
+.env.secrets
+aws-exports.js

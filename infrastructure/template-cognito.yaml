@@ -1,0 +1,106 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Sift — Cognito User Pool (deploy once, shared across envs)
+
+Parameters:
+  Env:
+    Type: String
+    AllowedValues: [dev, prod]
+    Default: dev
+  CognitoDomainPrefix:
+    Type: String
+    Description: Must be globally unique across all AWS accounts
+    Default: sift-docmind
+
+Resources:
+
+  # Injects tenantId from Cognito user attribute into the JWT access token
+  PreTokenLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub sift-pre-token-${Env}
+      Runtime: python3.12
+      Handler: index.handler
+      InlineCode: |
+        def handler(event, context):
+            tenant_id = event['request']['userAttributes'].get('custom:tenantId', '')
+            event['response']['claimsOverrideDetails'] = {
+                'claimsToAddOrOverride': {'tenantId': tenant_id}
+            }
+            return event
+      Policies:
+        - AWSLambdaBasicExecutionRole
+
+  PreTokenLambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt PreTokenLambda.Arn
+      Action: lambda:InvokeFunction
+      Principal: cognito-idp.amazonaws.com
+      SourceArn: !GetAtt UserPool.Arn
+
+  UserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: !Sub sift-${Env}
+      UsernameAttributes: [email]
+      AutoVerifiedAttributes: [email]
+      Schema:
+        - Name: tenantId
+          AttributeDataType: String
+          Mutable: true
+      LambdaConfig:
+        PreTokenGeneration: !GetAtt PreTokenLambda.Arn
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 8
+          RequireUppercase: true
+          RequireLowercase: true
+          RequireNumbers: true
+          RequireSymbols: false
+      AccountRecoverySetting:
+        RecoveryMechanisms:
+          - Name: verified_email
+            Priority: 1
+
+  UserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: !Sub sift-web-${Env}
+      UserPoolId: !Ref UserPool
+      GenerateSecret: false
+      ExplicitAuthFlows:
+        - ALLOW_USER_SRP_AUTH
+        - ALLOW_REFRESH_TOKEN_AUTH
+      SupportedIdentityProviders: [COGNITO]
+      CallbackURLs:
+        - http://localhost:5173
+      LogoutURLs:
+        - http://localhost:5173
+      AllowedOAuthFlows: [code]
+      AllowedOAuthScopes: [email, openid, profile]
+      AllowedOAuthFlowsUserPoolClient: true
+
+  UserPoolDomain:
+    Type: AWS::Cognito::UserPoolDomain
+    Properties:
+      Domain: !Sub ${CognitoDomainPrefix}-${Env}
+      UserPoolId: !Ref UserPool
+
+Outputs:
+  UserPoolId:
+    Value: !Ref UserPool
+    Export:
+      Name: !Sub sift-${Env}-UserPoolId
+  UserPoolClientId:
+    Value: !Ref UserPoolClient
+    Export:
+      Name: !Sub sift-${Env}-UserPoolClientId
+  UserPoolArn:
+    Value: !GetAtt UserPool.Arn
+    Export:
+      Name: !Sub sift-${Env}-UserPoolArn
+  CognitoDomain:
+    Value: !Sub ${CognitoDomainPrefix}-${Env}.auth.${AWS::Region}.amazoncognito.com
+    Export:
+      Name: !Sub sift-${Env}-CognitoDomain
