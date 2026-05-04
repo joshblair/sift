@@ -1,0 +1,207 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Sift — API Gateway + Lambda functions (C#)
+
+Parameters:
+  Env:
+    Type: String
+    AllowedValues: [dev, prod]
+    Default: dev
+  SamBucket:
+    Type: String
+    Description: S3 bucket for SAM artifacts (created by bootstrap.sh)
+
+Globals:
+  Function:
+    Runtime:      dotnet8
+    Architectures: [arm64]
+    MemorySize:   512
+    Timeout:      30
+    Environment:
+      Variables:
+        DB_SECRET_ARN:  !ImportValue
+          Fn::Sub: sift-${Env}-DBSecretArn
+        DB_HOST:        !ImportValue
+          Fn::Sub: sift-${Env}-DBEndpoint
+        DB_PORT:        !ImportValue
+          Fn::Sub: sift-${Env}-DBPort
+        DB_NAME:        sift
+        UPLOADS_BUCKET: !Sub sift-uploads-${Env}-${AWS::AccountId}
+        AWS_REGION_NAME: !Ref AWS::Region
+
+Resources:
+
+  # ── S3 Uploads Bucket ─────────────────────────────────────────────────────────
+
+  UploadsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub sift-uploads-${Env}-${AWS::AccountId}
+      CorsConfiguration:
+        CorsRules:
+          - AllowedMethods: [GET, PUT]
+            AllowedOrigins: ['*']
+            AllowedHeaders: ['*']
+            MaxAge: 3000
+      LifecycleConfiguration:
+        Rules:
+          - Id: delete-failed-uploads
+            Status: Enabled
+            AbortIncompleteMultipartUpload:
+              DaysAfterInitiation: 1
+
+  # ── API Gateway HTTP API ──────────────────────────────────────────────────────
+
+  HttpApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      StageName: !Ref Env
+      Auth:
+        DefaultAuthorizer: CognitoJwtAuthorizer
+        Authorizers:
+          CognitoJwtAuthorizer:
+            IdentitySource: $request.header.Authorization
+            JwtConfiguration:
+              issuer: !Sub
+                - https://cognito-idp.${AWS::Region}.amazonaws.com/${UserPoolId}
+                - UserPoolId: !ImportValue
+                    Fn::Sub: sift-${Env}-UserPoolId
+              audience:
+                - !ImportValue
+                    Fn::Sub: sift-${Env}-UserPoolClientId
+      CorsConfiguration:
+        AllowOrigins: ['*']
+        AllowHeaders: ['Content-Type', 'Authorization']
+        AllowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
+
+  # ── IAM Role for Lambda ───────────────────────────────────────────────────────
+
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub sift-lambda-${Env}
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: SiftLambdaPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - secretsmanager:GetSecretValue
+                Resource: !ImportValue
+                  Fn::Sub: sift-${Env}-DBSecretArn
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                  - s3:DeleteObject
+                Resource: !Sub arn:aws:s3:::sift-uploads-${Env}-${AWS::AccountId}/*
+              - Effect: Allow
+                Action:
+                  - bedrock:InvokeModel
+                Resource:
+                  - !Sub arn:aws:bedrock:${AWS::Region}::foundation-model/amazon.titan-embed-text-v2:0
+                  - !Sub arn:aws:bedrock:${AWS::Region}::foundation-model/anthropic.claude-3-haiku-20240307-v1:0
+
+  # ── Lambda Functions ──────────────────────────────────────────────────────────
+
+  DocumentsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub sift-documents-${Env}
+      CodeUri: ../backend/src/Sift.Api/
+      Handler: bootstrap::Sift.Api.Functions.DocumentsFunction::FunctionHandler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Events:
+        ListDocuments:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Method: GET
+            Path: /documents
+        UploadUrl:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Method: POST
+            Path: /documents/upload-url
+        GetDocument:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Method: GET
+            Path: /documents/{id}
+        DeleteDocument:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Method: DELETE
+            Path: /documents/{id}
+
+  ChatFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub sift-chat-${Env}
+      CodeUri: ../backend/src/Sift.Api/
+      Handler: bootstrap::Sift.Api.Functions.ChatFunction::FunctionHandler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Timeout: 60
+      Events:
+        Chat:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Method: POST
+            Path: /chat
+
+  TenantFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub sift-tenant-${Env}
+      CodeUri: ../backend/src/Sift.Api/
+      Handler: bootstrap::Sift.Api.Functions.TenantFunction::FunctionHandler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Events:
+        SyncUser:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Method: POST
+            Path: /tenants/me/sync
+        GetTenant:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Method: GET
+            Path: /tenants/me
+        ListUsers:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Method: GET
+            Path: /tenants/users
+        UpdateUserRole:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Method: PUT
+            Path: /tenants/users/{id}/role
+
+Outputs:
+  ApiUrl:
+    Value: !Sub https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com/${Env}
+    Export:
+      Name: !Sub sift-${Env}-ApiUrl
+  UploadsBucketName:
+    Value: !Ref UploadsBucket
+    Export:
+      Name: !Sub sift-${Env}-UploadsBucket
