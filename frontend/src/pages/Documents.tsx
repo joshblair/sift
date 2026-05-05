@@ -17,7 +17,7 @@ export function DocumentsPage() {
         {isLoading && <Spinner className="ml-2" />}
       </div>
 
-      <UploadDropzone onUpload={file => uploadMutation.mutateAsync(file)} />
+      <UploadDropzone onUpload={async file => { await uploadMutation.mutateAsync(file) }} />
 
       {docs.length === 0 && !isLoading ? (
         <div className="text-center py-16 text-slate-400">

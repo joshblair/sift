@@ -1,0 +1,93 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Sift — CloudFront + S3 static frontend hosting
+
+Parameters:
+  Env:
+    Type: String
+    AllowedValues: [dev, prod]
+    Default: dev
+
+Resources:
+
+  FrontendBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub sift-frontend-${Env}-${AWS::AccountId}
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls:       true
+        IgnorePublicAcls:      true
+        BlockPublicPolicy:     true
+        RestrictPublicBuckets: true
+
+  # Origin Access Control — lets CloudFront fetch from the private bucket
+  OriginAccessControl:
+    Type: AWS::CloudFront::OriginAccessControl
+    Properties:
+      OriginAccessControlConfig:
+        Name:                          !Sub sift-frontend-oac-${Env}
+        OriginAccessControlOriginType: s3
+        SigningBehavior:               always
+        SigningProtocol:               sigv4
+
+  CloudFrontDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Enabled:           true
+        DefaultRootObject: index.html
+        HttpVersion:       http2
+        PriceClass:        PriceClass_100   # US + Europe + Asia (~$0/mo at low traffic)
+        Origins:
+          - Id:         S3Origin
+            DomainName: !GetAtt FrontendBucket.RegionalDomainName
+            OriginAccessControlId: !GetAtt OriginAccessControl.Id
+            S3OriginConfig:
+              OriginAccessIdentity: ''
+        DefaultCacheBehavior:
+          TargetOriginId:       S3Origin
+          ViewerProtocolPolicy: redirect-to-https
+          # CachingOptimized managed policy
+          CachePolicyId:        658327ea-f89d-4fab-a63d-7e88639e58f6
+          AllowedMethods:       [GET, HEAD, OPTIONS]
+          CachedMethods:        [GET, HEAD]
+          Compress:             true
+        # SPA routing — let React Router handle 403/404
+        CustomErrorResponses:
+          - ErrorCode: 403
+            ResponseCode: 200
+            ResponsePagePath: /index.html
+            ErrorCachingMinTTL: 0
+          - ErrorCode: 404
+            ResponseCode: 200
+            ResponsePagePath: /index.html
+            ErrorCachingMinTTL: 0
+
+  # Allow CloudFront OAC to read from the bucket
+  FrontendBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref FrontendBucket
+      PolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: cloudfront.amazonaws.com
+            Action: s3:GetObject
+            Resource: !Sub ${FrontendBucket.Arn}/*
+            Condition:
+              StringEquals:
+                AWS:SourceArn: !Sub arn:aws:cloudfront::${AWS::AccountId}:distribution/${CloudFrontDistribution}
+
+Outputs:
+  FrontendBucketName:
+    Value: !Ref FrontendBucket
+    Export:
+      Name: !Sub sift-${Env}-FrontendBucket
+  CloudFrontDomain:
+    Value: !GetAtt CloudFrontDistribution.DomainName
+    Export:
+      Name: !Sub sift-${Env}-CloudFrontDomain
+  CloudFrontDistributionId:
+    Value: !Ref CloudFrontDistribution
+    Export:
+      Name: !Sub sift-${Env}-CloudFrontDistId
