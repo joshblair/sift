@@ -22,7 +22,7 @@ public class ChatService(DbConnectionFactory db) : IChatService
         var chunks     = await SearchChunksAsync(tenantId, embedding);
         var (answer, citations) = await GenerateAnswerAsync(bedrock, question, chunks);
 
-        return new ChatResponse { Answer = answer, Citations = citations };
+        return new ChatResponse { Answer = answer, ChatCitations = citations };
     }
 
     private static async Task<float[]> EmbedAsync(AmazonBedrockRuntimeClient bedrock, string text)
@@ -87,7 +87,7 @@ public class ChatService(DbConnectionFactory db) : IChatService
         return results;
     }
 
-    private static async Task<(string Answer, List<Citation> Citations)> GenerateAnswerAsync(
+    private static async Task<(string Answer, List<ChatCitation> ChatCitations)> GenerateAnswerAsync(
         AmazonBedrockRuntimeClient bedrock, string question, List<ChunkResult> chunks)
     {
         var context = string.Join("\n\n", chunks.Select((c, i) =>
@@ -126,7 +126,7 @@ public class ChatService(DbConnectionFactory db) : IChatService
             .GetProperty("text")
             .GetString() ?? "";
 
-        var citations = chunks.Select(c => new Citation
+        var citations = chunks.Select(c => new ChatCitation
         {
             DocumentId = c.DocumentId,
             Filename   = c.Filename,

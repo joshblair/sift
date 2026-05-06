@@ -19,7 +19,7 @@ public class ChatServiceTests
             Answer = "The refund policy allows returns within 30 days [1].",
             Citations =
             [
-                new Citation
+                new ChatCitation
                 {
                     DocumentId = Guid.NewGuid(),
                     Filename   = "policy.pdf",

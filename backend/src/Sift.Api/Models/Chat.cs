@@ -4,11 +4,11 @@ public record ChatRequest(string Question);
 
 public class ChatResponse
 {
-    public string       Answer   { get; set; } = "";
-    public List<Citation> Citations { get; set; } = [];
+    public string           Answer    { get; set; } = "";
+    public List<ChatCitation> Citations { get; set; } = [];
 }
 
-public class Citation
+public class ChatCitation
 {
     public Guid   DocumentId { get; set; }
     public string Filename   { get; set; } = "";
