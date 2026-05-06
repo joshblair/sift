@@ -212,7 +212,7 @@ Resources:
     DeletionPolicy: Snapshot
     Properties:
       Engine: aurora-postgresql
-      EngineVersion: '15.4'
+      EngineVersion: '16.6'
       DatabaseName: !Ref DBName
       MasterUsername: !Sub '{{resolve:secretsmanager:${DBSecret}:SecretString:username}}'
       MasterUserPassword: !Sub '{{resolve:secretsmanager:${DBSecret}:SecretString:password}}'
@@ -224,7 +224,6 @@ Resources:
         MaxCapacity: 4
       EnableHttpEndpoint: false
       StorageEncrypted: true
-      PubliclyAccessible: !If [IsDev, true, false]
       BackupRetentionPeriod: !If [IsDev, 1, 7]
       Tags:
         - Key: Env
