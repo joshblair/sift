@@ -26,10 +26,12 @@ export function configureAmplify() {
   })
 }
 
+// Use the ID token: Pre-Token Generation V1 only injects custom claims
+// (tenantId) into the ID token, not the access token.
 export async function getAccessToken(): Promise<string> {
   const session = await fetchAuthSession()
-  const token   = session.tokens?.accessToken?.toString()
-  if (!token) throw new Error('No access token')
+  const token   = session.tokens?.idToken?.toString()
+  if (!token) throw new Error('No ID token')
   return token
 }
 
