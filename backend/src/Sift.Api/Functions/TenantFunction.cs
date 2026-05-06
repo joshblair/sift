@@ -24,7 +24,8 @@ public class TenantFunction
         {
             var tenantId   = Guid.Parse(request.RequestContext.Authorizer.Jwt.Claims["tenantId"]);
             var cognitoSub = request.RequestContext.Authorizer.Jwt.Claims["sub"];
-            var email      = request.RequestContext.Authorizer.Jwt.Claims.GetValueOrDefault("email", "");
+            var claims     = request.RequestContext.Authorizer.Jwt.Claims;
+            var email      = claims.TryGetValue("email", out var e) ? e : "";
             var method     = request.RequestContext.Http.Method.ToUpper();
             var path       = request.RequestContext.Http.Path;
 

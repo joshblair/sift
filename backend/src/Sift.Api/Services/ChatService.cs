@@ -22,7 +22,7 @@ public class ChatService(DbConnectionFactory db) : IChatService
         var chunks     = await SearchChunksAsync(tenantId, embedding);
         var (answer, citations) = await GenerateAnswerAsync(bedrock, question, chunks);
 
-        return new ChatResponse { Answer = answer, ChatCitations = citations };
+        return new ChatResponse { Answer = answer, Citations = citations };
     }
 
     private static async Task<float[]> EmbedAsync(AmazonBedrockRuntimeClient bedrock, string text)
