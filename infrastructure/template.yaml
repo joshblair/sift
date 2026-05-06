@@ -122,7 +122,7 @@ Resources:
       FunctionName: !Sub sift-documents-${Env}
       CodeUri: ../backend/src/Sift.Api/
       Handler: bootstrap::Sift.Api.Functions.DocumentsFunction::FunctionHandler
-      Architectures: [arm64]
+      Architectures: [x86_64]
       Role: !GetAtt LambdaExecutionRole.Arn
       Events:
         ListDocuments:
@@ -156,7 +156,7 @@ Resources:
       FunctionName: !Sub sift-chat-${Env}
       CodeUri: ../backend/src/Sift.Api/
       Handler: bootstrap::Sift.Api.Functions.ChatFunction::FunctionHandler
-      Architectures: [arm64]
+      Architectures: [x86_64]
       Role: !GetAtt LambdaExecutionRole.Arn
       Timeout: 60
       Events:
@@ -173,7 +173,7 @@ Resources:
       FunctionName: !Sub sift-tenant-${Env}
       CodeUri: ../backend/src/Sift.Api/
       Handler: bootstrap::Sift.Api.Functions.TenantFunction::FunctionHandler
-      Architectures: [arm64]
+      Architectures: [x86_64]
       Role: !GetAtt LambdaExecutionRole.Arn
       Events:
         SyncUser:
@@ -209,7 +209,10 @@ Resources:
       LayerName: !Sub sift-pipeline-shared-${Env}
       ContentUri: ../backend/pipeline/layers/shared/
       CompatibleRuntimes: [python3.12]
+      CompatibleArchitectures: [x86_64]
       RetentionPolicy: Delete
+    Metadata:
+      BuildMethod: makefile
 
   # ── Pipeline: Python Lambda Functions ────────────────────────────────────────
 

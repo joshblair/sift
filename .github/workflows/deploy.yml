@@ -26,14 +26,18 @@ jobs:
           role-to-assume: ${{ vars.DEPLOY_ROLE_ARN }}
           aws-region:     ${{ vars.AWS_REGION }}
 
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
       - uses: aws-actions/setup-sam@v2
         with:
           use-installer: true
 
       - name: SAM build
-        # --use-container ensures Python packages compile for Amazon Linux (arm64 .NET, x86_64 Python)
-        # --mount-with WRITE needed for .NET build container to write output to source directory
-        run: sam build --use-container --mount-with WRITE --template-file infrastructure/template.yaml
+        # No --use-container: dotnet publishes natively; Python layer uses Makefile build method
+        # All functions are x86_64 to match the ubuntu-latest runner (no cross-arch emulation)
+        run: sam build --template-file infrastructure/template.yaml
 
       - name: SAM deploy — main stack
         run: |
