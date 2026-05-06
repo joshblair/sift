@@ -40,6 +40,9 @@ jobs:
         run: sam build --template-file infrastructure/template.yaml
 
       - name: SAM deploy — main stack
+        # No --template-file here: sam deploy without it reads .aws-sam/build/template.yaml
+        # which references the compiled artifacts from sam build above.
+        # Specifying infrastructure/template.yaml would bypass the build and repackage raw source.
         run: |
           sam deploy \
             --no-confirm-changeset \
@@ -47,7 +50,6 @@ jobs:
             --s3-bucket ${{ vars.SAM_BUCKET }} \
             --s3-prefix sift-main \
             --stack-name sift-dev \
-            --template-file infrastructure/template.yaml \
             --parameter-overrides Env=dev SamBucket=${{ vars.SAM_BUCKET }} \
             --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM
 
