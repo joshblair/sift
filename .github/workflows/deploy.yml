@@ -32,7 +32,8 @@ jobs:
 
       - name: SAM build
         # --use-container ensures Python packages compile for Amazon Linux (arm64 .NET, x86_64 Python)
-        run: sam build --use-container --template-file infrastructure/template.yaml
+        # --mount-with WRITE needed for .NET build container to write output to source directory
+        run: sam build --use-container --mount-with WRITE --template-file infrastructure/template.yaml
 
       - name: SAM deploy — main stack
         run: |
