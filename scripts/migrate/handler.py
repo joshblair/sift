@@ -1,10 +1,15 @@
--- Run once against the Aurora cluster after stack deploy.
--- Idempotent: safe to run multiple times.
+import json
+import os
+import boto3
+import psycopg2
 
+SECRET_ARN = os.environ["SECRET_ARN"]
+DB_HOST    = os.environ["DB_HOST"]
+DB_NAME    = os.environ.get("DB_NAME", "sift")
+
+MIGRATION_SQL = """
 CREATE EXTENSION IF NOT EXISTS vector;
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-
--- ── Tenants ───────────────────────────────────────────────────────────────────
 
 CREATE TABLE IF NOT EXISTS tenants (
   id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -12,8 +17,6 @@ CREATE TABLE IF NOT EXISTS tenants (
   slug       TEXT UNIQUE NOT NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
-
--- ── Users ─────────────────────────────────────────────────────────────────────
 
 CREATE TABLE IF NOT EXISTS users (
   id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -25,8 +28,6 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 CREATE INDEX IF NOT EXISTS idx_users_tenant ON users(tenant_id);
-
--- ── Documents ─────────────────────────────────────────────────────────────────
 
 CREATE TABLE IF NOT EXISTS documents (
   id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -49,15 +50,13 @@ CREATE TABLE IF NOT EXISTS documents (
 CREATE INDEX IF NOT EXISTS idx_documents_tenant ON documents(tenant_id);
 CREATE INDEX IF NOT EXISTS idx_documents_status  ON documents(tenant_id, status);
 
--- ── Document Chunks ───────────────────────────────────────────────────────────
-
 CREATE TABLE IF NOT EXISTS document_chunks (
   id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   document_id   UUID NOT NULL REFERENCES documents(id) ON DELETE CASCADE,
   tenant_id     UUID NOT NULL REFERENCES tenants(id),
   chunk_index   INT NOT NULL,
   content       TEXT NOT NULL,
-  embedding     vector(1536),   -- Bedrock Titan Embed v2 dimensions
+  embedding     vector(1536),
   created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
@@ -66,9 +65,6 @@ CREATE INDEX IF NOT EXISTS idx_chunks_embedding ON document_chunks
 
 CREATE INDEX IF NOT EXISTS idx_chunks_document ON document_chunks(document_id);
 CREATE INDEX IF NOT EXISTS idx_chunks_tenant   ON document_chunks(tenant_id);
-
--- ── Row-Level Security ────────────────────────────────────────────────────────
--- The C# middleware sets: SET LOCAL app.current_tenant_id = '<uuid>' on each connection.
 
 ALTER TABLE users           ENABLE ROW LEVEL SECURITY;
 ALTER TABLE documents       ENABLE ROW LEVEL SECURITY;
@@ -92,10 +88,33 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
 
--- ── Seed: two demo tenants ────────────────────────────────────────────────────
--- Actual users are created by Cognito signup; these are just the tenant rows.
-
 INSERT INTO tenants (id, name, slug) VALUES
   ('aaaaaaaa-0000-0000-0000-000000000001', 'Acme Corp',  'acme'),
   ('aaaaaaaa-0000-0000-0000-000000000002', 'Globex Inc', 'globex')
 ON CONFLICT DO NOTHING;
+"""
+
+
+def handler(event, context):
+    sm = boto3.client("secretsmanager")
+    secret = json.loads(
+        sm.get_secret_value(SecretId=SECRET_ARN)["SecretString"]
+    )
+
+    conn = psycopg2.connect(
+        host=DB_HOST,
+        port=5432,
+        dbname=DB_NAME,
+        user=secret["username"],
+        password=secret["password"],
+        connect_timeout=15,
+        sslmode="require",
+    )
+    conn.autocommit = True
+
+    with conn.cursor() as cur:
+        cur.execute(MIGRATION_SQL)
+
+    conn.close()
+    print("Migration complete")
+    return {"status": "ok", "message": "Migration applied successfully"}

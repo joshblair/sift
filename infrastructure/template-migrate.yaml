@@ -1,0 +1,70 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Sift — one-shot DB migration runner (deploy, invoke once, delete)
+
+Parameters:
+  Env:
+    Type: String
+    Default: dev
+  SecretArn:
+    Type: String
+  DbHost:
+    Type: String
+  DbName:
+    Type: String
+    Default: sift
+  LambdaSecurityGroupId:
+    Type: String
+  PrivateSubnet1Id:
+    Type: String
+  PrivateSubnet2Id:
+    Type: String
+
+Resources:
+
+  MigrateRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub sift-${Env}-migrate-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+      Policies:
+        - PolicyName: ReadSecret
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: secretsmanager:GetSecretValue
+                Resource: !Ref SecretArn
+
+  MigrateFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub sift-${Env}-migrate
+      CodeUri: ../scripts/migrate/
+      Handler: handler.handler
+      Runtime: python3.12
+      Timeout: 120
+      Role: !GetAtt MigrateRole.Arn
+      Environment:
+        Variables:
+          SECRET_ARN: !Ref SecretArn
+          DB_HOST: !Ref DbHost
+          DB_NAME: !Ref DbName
+      VpcConfig:
+        SecurityGroupIds:
+          - !Ref LambdaSecurityGroupId
+        SubnetIds:
+          - !Ref PrivateSubnet1Id
+          - !Ref PrivateSubnet2Id
+
+Outputs:
+  FunctionName:
+    Value: !Ref MigrateFunction

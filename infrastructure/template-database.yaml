@@ -222,7 +222,7 @@ Resources:
       ServerlessV2ScalingConfiguration:
         MinCapacity: 0
         MaxCapacity: 4
-      EnableHttpEndpoint: false
+      EnableHttpEndpoint: !If [IsDev, true, false]
       StorageEncrypted: true
       BackupRetentionPeriod: !If [IsDev, 1, 7]
       Tags:
