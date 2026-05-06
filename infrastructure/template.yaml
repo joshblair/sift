@@ -118,6 +118,8 @@ Resources:
 
   DocumentsFunction:
     Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: makefile
     Properties:
       FunctionName: !Sub sift-documents-${Env}
       CodeUri: ../backend/src/Sift.Api/
@@ -152,6 +154,8 @@ Resources:
 
   ChatFunction:
     Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: makefile
     Properties:
       FunctionName: !Sub sift-chat-${Env}
       CodeUri: ../backend/src/Sift.Api/
@@ -169,6 +173,8 @@ Resources:
 
   TenantFunction:
     Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: makefile
     Properties:
       FunctionName: !Sub sift-tenant-${Env}
       CodeUri: ../backend/src/Sift.Api/
