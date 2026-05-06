@@ -22,8 +22,9 @@ Resources:
       Runtime: python3.12
       Handler: index.handler
       InlineCode: |
+        DEFAULT_TENANT = 'aaaaaaaa-0000-0000-0000-000000000001'  # acme demo tenant
         def handler(event, context):
-            tenant_id = event['request']['userAttributes'].get('custom:tenantId', '')
+            tenant_id = event['request']['userAttributes'].get('custom:tenantId') or DEFAULT_TENANT
             event['response']['claimsOverrideDetails'] = {
                 'claimsToAddOrOverride': {'tenantId': tenant_id}
             }
