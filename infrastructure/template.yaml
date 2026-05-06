@@ -14,7 +14,6 @@ Parameters:
 Globals:
   Function:
     Runtime:      dotnet8
-    Architectures: [arm64]
     MemorySize:   512
     Timeout:      30
     Environment:
@@ -123,6 +122,7 @@ Resources:
       FunctionName: !Sub sift-documents-${Env}
       CodeUri: ../backend/src/Sift.Api/
       Handler: bootstrap::Sift.Api.Functions.DocumentsFunction::FunctionHandler
+      Architectures: [arm64]
       Role: !GetAtt LambdaExecutionRole.Arn
       Events:
         ListDocuments:
@@ -156,6 +156,7 @@ Resources:
       FunctionName: !Sub sift-chat-${Env}
       CodeUri: ../backend/src/Sift.Api/
       Handler: bootstrap::Sift.Api.Functions.ChatFunction::FunctionHandler
+      Architectures: [arm64]
       Role: !GetAtt LambdaExecutionRole.Arn
       Timeout: 60
       Events:
@@ -172,6 +173,7 @@ Resources:
       FunctionName: !Sub sift-tenant-${Env}
       CodeUri: ../backend/src/Sift.Api/
       Handler: bootstrap::Sift.Api.Functions.TenantFunction::FunctionHandler
+      Architectures: [arm64]
       Role: !GetAtt LambdaExecutionRole.Arn
       Events:
         SyncUser:
