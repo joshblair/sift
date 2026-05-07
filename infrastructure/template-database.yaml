@@ -193,8 +193,10 @@ Resources:
     Properties:
       DBSubnetGroupDescription: Aurora subnet group
       SubnetIds:
-        - !Ref PrivateSubnet1
-        - !Ref PrivateSubnet2
+        # Dev: public subnets so PubliclyAccessible=true actually works (no NAT cost).
+        # Prod: private subnets + NAT + Lambda in VPC.
+        - !If [IsDev, !Ref PublicSubnet1, !Ref PrivateSubnet1]
+        - !If [IsDev, !Ref PublicSubnet2, !Ref PrivateSubnet2]
 
   DBSecret:
     Type: AWS::SecretsManager::Secret
