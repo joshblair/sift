@@ -28,7 +28,7 @@ public class DocumentsFunction
             var tenantId = GetTenantId(request);
             var userId   = GetUserId(request);
             var method   = request.RequestContext.Http.Method.ToUpper();
-            var path     = request.RequestContext.Http.Path;
+            var path     = request.RawPath;
 
             await using var scope = _services.CreateAsyncScope();
             var svc = scope.ServiceProvider.GetRequiredService<IDocumentService>();

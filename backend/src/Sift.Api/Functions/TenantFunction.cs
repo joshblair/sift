@@ -27,7 +27,7 @@ public class TenantFunction
             var claims     = request.RequestContext.Authorizer.Jwt.Claims;
             var email      = claims.TryGetValue("email", out var e) ? e : "";
             var method     = request.RequestContext.Http.Method.ToUpper();
-            var path       = request.RequestContext.Http.Path;
+            var path     = request.RawPath;
 
             await using var scope = _services.CreateAsyncScope();
             var svc = scope.ServiceProvider.GetRequiredService<ITenantService>();
