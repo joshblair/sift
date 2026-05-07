@@ -3,6 +3,19 @@ using Amazon.Lambda.APIGatewayEvents;
 
 namespace Sift.Api.Infrastructure;
 
+public static class RequestHelpers
+{
+    /// Returns the path without the stage prefix.
+    /// For stage "dev", rawPath "/dev/tenants/me" → "/tenants/me".
+    public static string GetPath(APIGatewayHttpApiV2ProxyRequest request)
+    {
+        var stage   = request.RequestContext.Stage ?? "";
+        var rawPath = request.RawPath ?? "";
+        var prefix  = $"/{stage}";
+        return rawPath.StartsWith(prefix) ? rawPath[prefix.Length..] : rawPath;
+    }
+}
+
 public static class ApiResponse
 {
     private static readonly JsonSerializerOptions JsonOpts = new()
