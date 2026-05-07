@@ -57,7 +57,7 @@ CREATE TABLE IF NOT EXISTS document_chunks (
   tenant_id     UUID NOT NULL REFERENCES tenants(id),
   chunk_index   INT NOT NULL,
   content       TEXT NOT NULL,
-  embedding     vector(1536),   -- Bedrock Titan Embed v2 dimensions
+  embedding     vector(1024),   -- Bedrock Titan Embed v2 max dimensions
   created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 

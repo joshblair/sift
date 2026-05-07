@@ -30,7 +30,7 @@ public class ChatService(DbConnectionFactory db) : IChatService
         var payload = JsonSerializer.Serialize(new
         {
             inputText  = text,
-            dimensions = 1536,
+            dimensions = 1024,
             normalize  = true
         });
 

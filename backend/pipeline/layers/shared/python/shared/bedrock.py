@@ -20,7 +20,7 @@ def _get_client():
 
 
 def embed(text: str) -> list[float]:
-    payload = json.dumps({"inputText": text, "dimensions": 1536, "normalize": True})
+    payload = json.dumps({"inputText": text, "dimensions": 1024, "normalize": True})
     response = _get_client().invoke_model(
         modelId=EMBED_MODEL_ID,
         contentType="application/json",
