@@ -4,8 +4,8 @@ import sys
 import boto3
 
 REGION      = "us-west-2"
-CLUSTER_ARN = "arn:aws:rds:us-west-2:709085484102:cluster:sift-database-dev-dbcluster-0pthpvpg4ib3"
-SECRET_ARN  = "arn:aws:secretsmanager:us-west-2:709085484102:secret:sift-dev-db-credentials-GCgfaw"
+CLUSTER_ARN = "arn:aws:rds:us-west-2:709085484102:cluster:sift-database-dev-dbcluster-rretvpgesdca"
+SECRET_ARN  = "arn:aws:secretsmanager:us-west-2:709085484102:secret:sift-dev-db-credentials-wqkVbM"
 DATABASE    = "sift"
 
 # Each item is a single SQL statement (the Data API executes one at a time).
