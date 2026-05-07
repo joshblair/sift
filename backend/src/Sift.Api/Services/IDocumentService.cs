@@ -6,6 +6,6 @@ public interface IDocumentService
 {
     Task<List<Document>> ListAsync(Guid tenantId);
     Task<Document?> GetAsync(Guid tenantId, Guid documentId);
-    Task<UploadUrlResponse> CreatePresignedUploadUrlAsync(Guid tenantId, Guid userId, string filename, string fileType);
+    Task<UploadUrlResponse> CreatePresignedUploadUrlAsync(Guid tenantId, string cognitoSub, string filename, string fileType);
     Task DeleteAsync(Guid tenantId, Guid documentId);
 }

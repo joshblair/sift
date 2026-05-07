@@ -25,10 +25,10 @@ public class DocumentsFunction
     {
         try
         {
-            var tenantId = GetTenantId(request);
-            var userId   = GetUserId(request);
-            var method   = request.RequestContext.Http.Method.ToUpper();
-            var path     = RequestHelpers.GetPath(request);
+            var tenantId   = GetTenantId(request);
+            var cognitoSub = request.RequestContext.Authorizer.Jwt.Claims["sub"];
+            var method     = request.RequestContext.Http.Method.ToUpper();
+            var path       = RequestHelpers.GetPath(request);
 
             await using var scope = _services.CreateAsyncScope();
             var svc = scope.ServiceProvider.GetRequiredService<IDocumentService>();
@@ -36,7 +36,7 @@ public class DocumentsFunction
             return (method, path) switch
             {
                 ("GET",    "/documents")                => await HandleList(svc, tenantId),
-                ("POST",   "/documents/upload-url")     => await HandleUploadUrl(svc, request, tenantId, userId),
+                ("POST",   "/documents/upload-url")     => await HandleUploadUrl(svc, request, tenantId, cognitoSub),
                 ("GET",    _) when IsDocPath(path)      => await HandleGet(svc, tenantId, DocId(path)),
                 ("DELETE", _) when IsDocPath(path)      => await HandleDelete(svc, tenantId, DocId(path)),
                 ("OPTIONS", _)                          => ApiResponse.NoContent(),
@@ -59,7 +59,7 @@ public class DocumentsFunction
 
     private static async Task<APIGatewayHttpApiV2ProxyResponse> HandleUploadUrl(
         IDocumentService svc, APIGatewayHttpApiV2ProxyRequest request,
-        Guid tenantId, Guid userId)
+        Guid tenantId, string cognitoSub)
     {
         var body = JsonSerializer.Deserialize<UploadUrlRequest>(request.Body ?? "{}",
             new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
@@ -71,7 +71,7 @@ public class DocumentsFunction
         if (!validTypes.Contains(body.FileType.ToLower()))
             return ApiResponse.BadRequest($"fileType must be one of: {string.Join(", ", validTypes)}");
 
-        var result = await svc.CreatePresignedUploadUrlAsync(tenantId, userId, body.Filename, body.FileType.ToLower());
+        var result = await svc.CreatePresignedUploadUrlAsync(tenantId, cognitoSub, body.Filename, body.FileType.ToLower());
         return ApiResponse.Created(result);
     }
 
@@ -93,17 +93,6 @@ public class DocumentsFunction
     {
         var claim = request.RequestContext.Authorizer.Jwt.Claims["tenantId"];
         return Guid.Parse(claim);
-    }
-
-    private static Guid GetUserId(APIGatewayHttpApiV2ProxyRequest request)
-    {
-        // The user's internal DB ID is stored as a custom claim after first login.
-        // Falls back to Guid.Empty for the upload URL flow where the user ensures
-        // their DB record exists via TenantFunction on first sign-in.
-        if (request.RequestContext.Authorizer.Jwt.Claims.TryGetValue("userId", out var id)
-            && Guid.TryParse(id, out var userId))
-            return userId;
-        return Guid.Empty;
     }
 
     private static bool IsDocPath(string path) =>

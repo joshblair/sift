@@ -54,14 +54,21 @@ public class DocumentService(DbConnectionFactory db) : IDocumentService
     }
 
     public async Task<UploadUrlResponse> CreatePresignedUploadUrlAsync(
-        Guid tenantId, Guid userId, string filename, string fileType)
+        Guid tenantId, string cognitoSub, string filename, string fileType)
     {
         var docId  = Guid.NewGuid();
         var s3Key  = $"{tenantId}/{docId}/{filename}";
 
-        // Create document record first so the pipeline can update it on completion.
         await using var conn = await db.CreateAsync();
         await TenantContext.SetAsync(conn, tenantId);
+
+        // Resolve the internal user UUID from the Cognito sub claim.
+        await using var lookupCmd = conn.CreateCommand();
+        lookupCmd.CommandText = "SELECT id FROM users WHERE cognito_sub = $1 AND tenant_id = $2";
+        lookupCmd.Parameters.AddWithValue(cognitoSub);
+        lookupCmd.Parameters.AddWithValue(tenantId);
+        var userId = (Guid?)await lookupCmd.ExecuteScalarAsync()
+            ?? throw new InvalidOperationException($"User not found for sub={cognitoSub}");
 
         await using var cmd = conn.CreateCommand();
         cmd.CommandText = """
