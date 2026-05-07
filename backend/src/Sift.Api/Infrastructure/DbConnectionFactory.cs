@@ -66,9 +66,7 @@ public class DbConnectionFactory
         Environment.GetEnvironmentVariable(name)
         ?? throw new InvalidOperationException($"Missing environment variable: {name}");
 
-    private sealed record DbSecret(string username, string password)
-    {
-        public string Username => username;
-        public string Password => password;
-    }
+    private sealed record DbSecret(
+        [property: System.Text.Json.Serialization.JsonPropertyName("username")] string Username,
+        [property: System.Text.Json.Serialization.JsonPropertyName("password")] string Password);
 }
