@@ -75,6 +75,9 @@ Resources:
         AllowOrigins: ['*']
         AllowHeaders: ['Content-Type', 'Authorization']
         AllowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
+      DefaultRouteSettings:
+        ThrottlingBurstLimit: 20   # max concurrent in-flight requests
+        ThrottlingRateLimit: 10    # sustained requests/sec per account
 
   # ── IAM Role for Lambda ───────────────────────────────────────────────────────
 
