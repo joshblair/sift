@@ -112,7 +112,7 @@ Resources:
                   - bedrock:InvokeModel
                 Resource:
                   - !Sub arn:aws:bedrock:${AWS::Region}::foundation-model/amazon.titan-embed-text-v2:0
-                  - !Sub arn:aws:bedrock:${AWS::Region}::foundation-model/anthropic.claude-haiku-4-5-20251001-v1:0
+                  - !Sub arn:aws:bedrock:${AWS::Region}::foundation-model/us.anthropic.claude-haiku-4-5-20251001-v1:0
 
   # ── Lambda Functions ──────────────────────────────────────────────────────────
 
@@ -318,7 +318,7 @@ Resources:
               Resource: !ImportValue { Fn::Sub: "sift-${Env}-DBSecretArn" }
             - Effect: Allow
               Action: bedrock:InvokeModel
-              Resource: !Sub arn:aws:bedrock:${AWS::Region}::foundation-model/anthropic.claude-haiku-4-5-20251001-v1:0
+              Resource: !Sub arn:aws:bedrock:${AWS::Region}::foundation-model/us.anthropic.claude-haiku-4-5-20251001-v1:0
 
   MarkReadyFunction:
     Type: AWS::Serverless::Function

@@ -11,7 +11,7 @@ namespace Sift.Api.Services;
 public class ChatService(DbConnectionFactory db) : IChatService
 {
     private const string EmbedModelId = "amazon.titan-embed-text-v2:0";
-    private const string ChatModelId  = "anthropic.claude-haiku-4-5-20251001-v1:0";
+    private const string ChatModelId  = "us.anthropic.claude-haiku-4-5-20251001-v1:0";
     private const int    TopK         = 8;
 
     public async Task<ChatResponse> QueryAsync(Guid tenantId, string question)
