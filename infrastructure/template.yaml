@@ -370,12 +370,6 @@ Resources:
 
   # ── Step Functions State Machine ─────────────────────────────────────────────
 
-  PipelineLogGroup:
-    Type: AWS::Logs::LogGroup
-    Properties:
-      LogGroupName: !Sub /aws/states/sift-pipeline-${Env}
-      RetentionInDays: 7
-
   PipelineStateMachineRole:
     Type: AWS::IAM::Role
     Properties:
@@ -403,6 +397,7 @@ Resources:
                   - !GetAtt MarkFailedFunction.Arn
               - Effect: Allow
                 Action:
+                  - logs:CreateLogGroup
                   - logs:CreateLogDelivery
                   - logs:PutLogEvents
                   - logs:GetLogDelivery
@@ -423,7 +418,7 @@ Resources:
       Logging:
         Destinations:
           - CloudWatchLogsLogGroup:
-              LogGroupArn: !GetAtt PipelineLogGroup.Arn
+              LogGroupArn: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/states/sift-pipeline-${Env}:*
         IncludeExecutionData: true
         Level: ALL
       Definition:
