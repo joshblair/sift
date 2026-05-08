@@ -6,7 +6,7 @@ import boto3
 _client = None
 
 EMBED_MODEL_ID = "amazon.titan-embed-text-v2:0"
-CHAT_MODEL_ID  = "anthropic.claude-3-5-haiku-20241022-v1:0"
+CHAT_MODEL_ID  = "anthropic.claude-haiku-4-5-20251001-v1:0"
 
 
 def _get_client():
