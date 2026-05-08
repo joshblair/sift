@@ -34,7 +34,7 @@ def get_connection(tenant_id: str | None = None) -> psycopg2.extensions.connecti
     if tenant_id:
         with conn.cursor() as cur:
             cur.execute(
-                "SELECT set_config('app.current_tenant_id', %s, true)",
+                "SELECT set_config('app.current_tenant_id', %s, false)",
                 (str(tenant_id),),
             )
         conn.commit()
