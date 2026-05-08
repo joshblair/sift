@@ -370,6 +370,12 @@ Resources:
 
   # ── Step Functions State Machine ─────────────────────────────────────────────
 
+  PipelineLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/states/sift-pipeline-${Env}
+      RetentionInDays: 7
+
   PipelineStateMachineRole:
     Type: AWS::IAM::Role
     Properties:
@@ -395,6 +401,18 @@ Resources:
                   - !GetAtt ExtractMetadataFunction.Arn
                   - !GetAtt MarkReadyFunction.Arn
                   - !GetAtt MarkFailedFunction.Arn
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogDelivery
+                  - logs:PutLogEvents
+                  - logs:GetLogDelivery
+                  - logs:UpdateLogDelivery
+                  - logs:DeleteLogDelivery
+                  - logs:ListLogDeliveries
+                  - logs:PutResourcePolicy
+                  - logs:DescribeResourcePolicies
+                  - logs:DescribeLogGroups
+                Resource: '*'
 
   PipelineStateMachine:
     Type: AWS::Serverless::StateMachine
@@ -402,6 +420,12 @@ Resources:
       Name: !Sub sift-pipeline-${Env}
       Type: EXPRESS
       Role: !GetAtt PipelineStateMachineRole.Arn
+      Logging:
+        Destinations:
+          - CloudWatchLogsLogGroup:
+              LogGroupArn: !GetAtt PipelineLogGroup.Arn
+        IncludeExecutionData: true
+        Level: ALL
       Definition:
         Comment: Sift document ingestion pipeline
         StartAt: ExtractText
