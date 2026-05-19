@@ -10,7 +10,7 @@ Built as a portfolio demonstration of full-stack AI/cloud engineering: serverles
 
 ## Live Demo
 
-> **[sift.joshblair.dev](https://sift.joshblair.dev)** — sign up with any email, start uploading immediately.
+> **[[https://d3dsn1f23yg4bo.cloudfront.net/]](https://d3dsn1f23yg4bo.cloudfront.net/)** — sign up with any email, start uploading immediately.
 
 The demo environment runs in a shared tenant (Acme Corp). Documents you upload are processed within ~30 seconds and immediately available for chat.
 
