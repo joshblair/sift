@@ -36,3 +36,4 @@ dist/
 # AWS credentials / secrets — never commit these
 .env.secrets
 aws-exports.js
+global-bundle.pem
