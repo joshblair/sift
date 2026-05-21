@@ -92,6 +92,7 @@ Every API call goes through this interceptor, so no individual function or compo
 
 `App.tsx` wraps everything in the Amplify `Authenticator` component:
 
+{% raw %}
 ```tsx
 export default function App() {
   return (
@@ -103,11 +104,13 @@ export default function App() {
   )
 }
 ```
+{% endraw %}
 
 `Authenticator` renders the Cognito Hosted UI for unauthenticated users — sign-in, sign-up, email verification — and calls its render prop only after the user is authenticated. The entire application sits inside that render prop. No route guards, no redirect logic, no token-checking in individual components.
 
 The first thing `AppRoutes` does on mount is sync the user record:
 
+{% raw %}
 ```tsx
 function AppRoutes() {
   const [synced, setSynced] = useState(false)
@@ -120,6 +123,7 @@ function AppRoutes() {
   // ... routes
 }
 ```
+{% endraw %}
 
 `POST /tenants/me/sync` upserts the user row in the database using the JWT's `sub` and `email` claims. This handles first-time logins (where no user row exists yet) and keeps the email current if it changes in Cognito. The app doesn't render routes until this completes — a brief spinner rather than a flash of potentially stale state.
 
@@ -223,11 +227,13 @@ const statusConfig = {
 
 The processing badge uses `animate-spin` on its icon — a CSS animation that costs nothing and makes the in-progress state visually obvious. Once processing completes, the card fills in the summary paragraph and topic chips from the metadata extraction step. On failure, the error message from the `mark_failed` Lambda appears inline in a red callout:
 
+{% raw %}
 ```tsx
 {doc.status === 'failed' && doc.errorMessage && (
   <p className="mt-2 text-xs text-red-600 bg-red-50 rounded p-2">{doc.errorMessage}</p>
 )}
 ```
+{% endraw %}
 
 ---
 
@@ -270,6 +276,7 @@ The user's message is added to the thread immediately — before the API call co
 
 The `ChatPage` scrolls to the bottom on every new message:
 
+{% raw %}
 ```tsx
 const bottomRef = useRef<HTMLDivElement>(null)
 
@@ -277,6 +284,7 @@ useEffect(() => {
   bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
 }, [messages, isLoading])
 ```
+{% endraw %}
 
 The ref sits on a `<div>` after the last message. `scrollIntoView` fires both when a new message arrives and when `isLoading` becomes true (so the "Thinking…" indicator is visible). The input is disabled during loading — no queuing up a second question while the first is in flight.
 
@@ -284,6 +292,7 @@ The ref sits on a `<div>` after the last message. `scrollIntoView` fires both wh
 
 `ChatMessage` handles both user and assistant messages. User messages are right-aligned in a blue bubble; assistant messages are left-aligned in grey. Citations appear as cards below the assistant's response:
 
+{% raw %}
 ```tsx
 {message.citations && message.citations.length > 0 && (
   <div className="space-y-1">
@@ -299,6 +308,7 @@ The ref sits on a `<div>` after the last message. `scrollIntoView` fires both wh
   </div>
 )}
 ```
+{% endraw %}
 
 The `[1]`, `[2]` numbers here correspond to the same numbers Claude used inline in the answer text. The user can see "Revenue grew 18% in Q3 [1]" and then immediately read the exact sentence from the PDF that grounded that claim. `line-clamp-2` keeps the excerpt compact — two lines of truncated italic text, enough to confirm the source without overflowing the card.
 
