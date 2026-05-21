@@ -334,7 +334,8 @@ system = (
 LLMs sometimes wrap their JSON output in markdown code fences even when told not to. The handler strips them before parsing:
 
 ```python
-cleaned = response.strip().removeprefix("```json").removeprefix("```").removesuffix("```").strip()
+FENCE   = "`" * 3  # markdown code fence marker
+cleaned = response.strip().removeprefix(FENCE + "json").removeprefix(FENCE).removesuffix(FENCE).strip()
 data    = json.loads(cleaned)
 ```
 
