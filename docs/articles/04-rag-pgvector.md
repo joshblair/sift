@@ -4,7 +4,6 @@ published: true
 description: "How to build retrieval-augmented generation that actually cites its sources — without a vector database subscription."
 tags: aws, ai, postgresql, python
 series: "Building Sift: A Multi-Tenant AI Platform on AWS"
-cover_image: https://raw.githubusercontent.com/joshblair/sift/main/docs/diagrams/sift-diagram-architecture.png
 ---
 
 # RAG and Vector Search with pgvector and Amazon Bedrock (Part 4)

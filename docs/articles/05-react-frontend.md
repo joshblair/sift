@@ -4,7 +4,6 @@ published: true
 description: "React Query's refetchInterval turns a polling requirement into a one-liner. Here's the whole frontend, explained."
 tags: react, typescript, aws, webdev
 series: "Building Sift: A Multi-Tenant AI Platform on AWS"
-cover_image: https://raw.githubusercontent.com/joshblair/sift/main/docs/diagrams/sift-diagram-architecture.png
 ---
 
 # Building the React Frontend: Document Library and Chat UI (Part 5)

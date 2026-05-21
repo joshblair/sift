@@ -4,7 +4,6 @@ published: true
 description: "How a single Postgres session variable — app.current_tenant_id — eliminates an entire class of data-leak bugs at the database level."
 tags: aws, security, postgresql, dotnet
 series: "Building Sift: A Multi-Tenant AI Platform on AWS"
-cover_image: https://raw.githubusercontent.com/joshblair/sift/main/docs/diagrams/sift-diagram-multitenancy.png
 ---
 
 # Multi-Tenant Auth with Cognito and PostgreSQL Row-Level Security (Part 2)
@@ -40,6 +39,8 @@ Lambda  → extracts tenantId from request.RequestContext.Authorizer.Jwt.Claims
 ```
 
 Each step is independently enforced. A user can't forge the `tenantId` in the JWT because they don't have Cognito's signing key. A request can't skip the JWT check because API Gateway rejects it before Lambda runs. A query can't bypass the RLS filter because the application user doesn't have `BYPASSRLS`.
+
+![Sift multi-tenancy isolation diagram](https://raw.githubusercontent.com/joshblair/sift/main/docs/diagrams/sift-diagram-multitenancy.png)
 
 Let's walk through each layer.
 

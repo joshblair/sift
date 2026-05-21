@@ -4,7 +4,6 @@ published: true
 description: "Why I chose Step Functions over SQS + Lambda — and what the execution history is actually worth."
 tags: aws, serverless, python, architecture
 series: "Building Sift: A Multi-Tenant AI Platform on AWS"
-cover_image: https://raw.githubusercontent.com/joshblair/sift/main/docs/diagrams/sift-diagram-pipeline.png
 ---
 
 # Serverless Document Pipelines with AWS Step Functions (Part 3)
@@ -153,6 +152,8 @@ PipelineStateMachine:
           Resource: !GetAtt MarkFailedFunction.Arn
           End: true
 ```
+
+![Sift document pipeline diagram](https://raw.githubusercontent.com/joshblair/sift/main/docs/diagrams/sift-diagram-pipeline.png)
 
 Let's walk through each stage.
 
