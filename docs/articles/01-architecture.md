@@ -161,11 +161,11 @@ Since this is a portfolio project for AWS architecture roles, I mapped the desig
 
 This series covers each major subsystem in depth:
 
-- **Part 2:** Multi-tenant auth — how the Cognito Pre-Token Lambda works, the RLS policy setup, and the C# tenant context middleware
-- **Part 3:** The Step Functions pipeline — state machine design, the Map state for parallel embedding, error handling
-- **Part 4:** RAG and vector search — chunking strategy, pgvector queries, and how citations are generated
-- **Part 5:** The React frontend — polling patterns, Amplify auth integration, the upload flow
-- **Part 6:** CI/CD with GitHub Actions and OIDC — zero-secret deployments to AWS
+- **[Part 2](https://dev.to/josh_blair/multi-tenant-auth-with-cognito-and-postgresql-row-level-security-part-2-5d30):** Multi-tenant auth — how the Cognito Pre-Token Lambda works, the RLS policy setup, and the C# tenant context middleware
+- **[Part 3](https://dev.to/josh_blair/serverless-document-pipelines-with-aws-step-functions-part-3-2111):** The Step Functions pipeline — state machine design, the Map state for parallel embedding, error handling
+- **[Part 4](https://dev.to/josh_blair/rag-and-vector-search-with-pgvector-and-amazon-bedrock-part-4-5294):** RAG and vector search — chunking strategy, pgvector queries, and how citations are generated
+- **[Part 5](https://dev.to/josh_blair/building-the-react-frontend-document-library-and-chat-ui-part-5-22li):** The React frontend — polling patterns, Amplify auth integration, the upload flow
+- **[Part 6](https://dev.to/josh_blair/zero-secret-cicd-github-actions-oidc-on-aws-part-6-22e7):** CI/CD with GitHub Actions and OIDC — zero-secret deployments to AWS
 
 The live demo is running at [sift.bonefishsoftware.com](https://sift.bonefishsoftware.com) — log in with the shared Acme Corp credentials from the README and try uploading a PDF.
 

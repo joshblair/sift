@@ -263,7 +263,7 @@ The live demo has two tenants: **Acme Corp** and **Globex Inc**, both seeded in 
 
 ## What's Next
 
-**Part 3** covers the Step Functions Express pipeline — how the six-stage document processing workflow is orchestrated, why the Map state handles embedding generation, and how the state machine's declarative retry config replaces dozens of lines of error-handling code.
+**[Part 3](https://dev.to/josh_blair/serverless-document-pipelines-with-aws-step-functions-part-3-2111)** covers the Step Functions Express pipeline — how the six-stage document processing workflow is orchestrated, why the Map state handles embedding generation, and how the state machine's declarative retry config replaces dozens of lines of error-handling code.
 
 The code for everything in this post:
 - `infrastructure/template-cognito.yaml` — Pre-Token Lambda and User Pool definition

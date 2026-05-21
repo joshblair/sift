@@ -162,7 +162,7 @@ Let's walk through each stage.
 
 The first Lambda gets `{ s3Key, bucketName }` and has two jobs: parse the tenant and document IDs from the key, and extract plain text from whatever file type was uploaded.
 
-The S3 key format is `{tenantId}/{documentId}/{filename}` — the same prefix structure used for tenant isolation in S3 (covered in Part 2). Parsing it is a single split:
+The S3 key format is `{tenantId}/{documentId}/{filename}` — the same prefix structure used for tenant isolation in S3 (covered in [Part 2](https://dev.to/josh_blair/multi-tenant-auth-with-cognito-and-postgresql-row-level-security-part-2-5d30)). Parsing it is a single split:
 
 ```python
 parts       = s3_key.split("/", 2)
@@ -395,7 +395,7 @@ The failure is pinpointed: chunk 47, third retry, Bedrock throttle. Every invoca
 
 ## What's Next
 
-**Part 4** covers the RAG query path: how a user's question gets embedded, how pgvector finds the closest chunks across potentially thousands of document segments, and how the citation system links each paragraph of Claude's response back to the source text.
+**[Part 4](https://dev.to/josh_blair/rag-and-vector-search-with-pgvector-and-amazon-bedrock-part-4-5294)** covers the RAG query path: how a user's question gets embedded, how pgvector finds the closest chunks across potentially thousands of document segments, and how the citation system links each paragraph of Claude's response back to the source text.
 
 The code for this post:
 - `infrastructure/template.yaml` — state machine definition, EventBridge rule, InputTransformer

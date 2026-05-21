@@ -217,7 +217,7 @@ This matters for trust. A RAG system that returns confident-sounding answers wit
 
 The implementation above works well at demo scale. A few things I'd change for a real production deployment:
 
-**Chunking strategy.** The sliding-window chunker in Part 3 splits on character count, not semantic boundaries. A 512-token window can cut off mid-sentence, mid-table, or mid-list. Better approaches: a recursive sentence splitter that tries to preserve paragraph boundaries, or a semantic chunker that uses an embedding model to detect topic shifts. The trade-off is complexity and ingest latency.
+**Chunking strategy.** The sliding-window chunker in [Part 3](https://dev.to/josh_blair/serverless-document-pipelines-with-aws-step-functions-part-3-2111) splits on character count, not semantic boundaries. A 512-token window can cut off mid-sentence, mid-table, or mid-list. Better approaches: a recursive sentence splitter that tries to preserve paragraph boundaries, or a semantic chunker that uses an embedding model to detect topic shifts. The trade-off is complexity and ingest latency.
 
 **Index type.** IVFFlat is good for static or slowly-growing datasets, but it degrades as data is inserted after the index is built — you need periodic reindexing. HNSW (Hierarchical Navigable Small World) maintains search quality dynamically as data grows, at the cost of higher memory usage. For a production system with continuous ingestion, HNSW is the right default.
 
@@ -229,7 +229,7 @@ The implementation above works well at demo scale. A few things I'd change for a
 
 ## What's Next
 
-**Part 5** covers the React frontend: how the upload flow works, the polling pattern that drives the document status cards, and how Amplify's auth integration wires up the Cognito token flow.
+**[Part 5](https://dev.to/josh_blair/building-the-react-frontend-document-library-and-chat-ui-part-5-22li)** covers the React frontend: how the upload flow works, the polling pattern that drives the document status cards, and how Amplify's auth integration wires up the Cognito token flow.
 
 The code for this post:
 - `backend/shared/bedrock.py` — embedding call, normalize flag

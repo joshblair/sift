@@ -71,7 +71,7 @@ export async function getAccessToken(): Promise<string> {
 }
 ```
 
-Notice it's returning the **ID token**, not the access token. This is intentional and slightly non-obvious. Cognito's Pre-Token Generation V1 trigger — which injects the `tenantId` custom claim (covered in Part 2) — only applies to the ID token. The access token doesn't get custom claims from V1 triggers. Since API Gateway validates the `tenantId` claim from the token, the ID token is what needs to be sent.
+Notice it's returning the **ID token**, not the access token. This is intentional and slightly non-obvious. Cognito's Pre-Token Generation V1 trigger — which injects the `tenantId` custom claim (covered in [Part 2](https://dev.to/josh_blair/multi-tenant-auth-with-cognito-and-postgresql-row-level-security-part-2-5d30)) — only applies to the ID token. The access token doesn't get custom claims from V1 triggers. Since API Gateway validates the `tenantId` claim from the token, the ID token is what needs to be sent.
 
 Amplify handles token refresh transparently — `fetchAuthSession()` returns a fresh token if the current one is near expiry, with no code required on the caller's side.
 
@@ -323,7 +323,7 @@ The demo is complete enough to show in an interview, but a production deployment
 
 ## What's Next
 
-**Part 6** covers the CI/CD pipeline — GitHub Actions with OIDC federation, how the deploy workflow deploys five nested SAM stacks in dependency order, and why there are zero stored AWS credentials anywhere in the repository.
+**[Part 6](https://dev.to/josh_blair/zero-secret-cicd-github-actions-oidc-on-aws-part-6-22e7)** covers the CI/CD pipeline — GitHub Actions with OIDC federation, how the deploy workflow deploys five nested SAM stacks in dependency order, and why there are zero stored AWS credentials anywhere in the repository.
 
 The code for this post:
 - `frontend/src/auth/cognito.ts` — Amplify config, ID token vs access token
