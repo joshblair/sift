@@ -1,6 +1,6 @@
 ---
 title: "Building a Multi-Tenant AI Document Platform on AWS (Part 1: Architecture)"
-published: false
+published: true
 description: "How I designed a production-ready RAG system from scratch using AWS-native services — and kept the monthly bill under $20."
 tags: aws, architecture, serverless, postgresql
 series: "Building Sift: A Multi-Tenant AI Platform on AWS"

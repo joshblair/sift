@@ -1,6 +1,6 @@
 ---
 title: "Serverless Document Pipelines with AWS Step Functions (Part 3)"
-published: false
+published: true
 description: "Why I chose Step Functions over SQS + Lambda — and what the execution history is actually worth."
 tags: aws, serverless, python, architecture
 series: "Building Sift: A Multi-Tenant AI Platform on AWS"
