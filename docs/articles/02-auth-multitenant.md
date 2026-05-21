@@ -1,3 +1,12 @@
+---
+title: "Multi-Tenant Auth with Cognito and PostgreSQL Row-Level Security (Part 2)"
+published: false
+description: "How a single Postgres session variable — app.current_tenant_id — eliminates an entire class of data-leak bugs at the database level."
+tags: aws, security, postgresql, dotnet
+series: "Building Sift: A Multi-Tenant AI Platform on AWS"
+cover_image: https://raw.githubusercontent.com/joshblair/sift/main/docs/diagrams/sift-diagram-multitenancy.png
+---
+
 # Multi-Tenant Auth with Cognito and PostgreSQL Row-Level Security (Part 2)
 
 *How a single Postgres session variable — `app.current_tenant_id` — eliminates an entire class of data-leak bugs at the database level.*

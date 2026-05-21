@@ -1,3 +1,12 @@
+---
+title: "Building a Multi-Tenant AI Document Platform on AWS (Part 1: Architecture)"
+published: false
+description: "How I designed a production-ready RAG system from scratch using AWS-native services — and kept the monthly bill under $20."
+tags: aws, architecture, serverless, postgresql
+series: "Building Sift: A Multi-Tenant AI Platform on AWS"
+cover_image: https://raw.githubusercontent.com/joshblair/sift/main/docs/diagrams/sift-diagram-architecture.png
+---
+
 # Building a Multi-Tenant AI Document Platform on AWS (Part 1: Architecture)
 
 *How I designed a production-ready RAG system from scratch using AWS-native services — and kept the monthly bill under $20.*
@@ -24,56 +33,7 @@ It's a legitimate enterprise use case: internal knowledge bases, contract review
 
 Here's how data flows through the system:
 
-```
-┌──────────────────────────────────────────────────────────────────┐
-│                         Browser (React SPA)                      │
-└──────────┬───────────────────────────────────────────────────────┘
-           │ Auth: JWT (Cognito)
-           ▼
-┌──────────────────────┐     ┌─────────────────────────────────────┐
-│  CloudFront + S3     │     │       Amazon Cognito                │
-│  (Static hosting)    │     │  User Pool + Pre-Token Lambda       │
-└──────────────────────┘     └─────────────────────────────────────┘
-                                         │ JWT with custom tenantId claim
-           ┌─────────────────────────────▼
-           │        API Gateway HTTP API
-           │        (Cognito JWT Authorizer)
-           └────────┬────────────────────────────┐
-                    │                            │
-        ┌───────────▼──────────┐   ┌─────────────▼──────────────┐
-        │  DocumentsFunction   │   │       ChatFunction         │
-        │  (.NET 8 Lambda)     │   │      (.NET 8 Lambda)       │
-        │  GET/POST/DELETE     │   │  Embed → pgvector → Claude  │
-        └───────────┬──────────┘   └─────────────┬──────────────┘
-                    │                             │
-           S3 Presigned URL               Bedrock (Titan Embed v2
-           (Direct browser upload)         + Claude Haiku 4.5)
-                    │
-           ┌────────▼────────┐
-           │    S3 Bucket    │
-           │ (Document store)│
-           └────────┬────────┘
-                    │ EventBridge (Object Created)
-                    ▼
-        ┌───────────────────────────────────────┐
-        │    Step Functions Express Workflow    │
-        │                                       │
-        │  1. ExtractText  (Python Lambda)      │
-        │  2. ChunkText    (Python Lambda)      │
-        │  3. GenerateEmbeddings (Map State)    │
-        │     └── EmbedChunk × N (parallel)    │
-        │  4. ExtractMetadata  (Python Lambda)  │
-        │  5. MarkReady    (Python Lambda)      │
-        │     MarkFailed   (Python Lambda)      │
-        └───────────┬───────────────────────────┘
-                    │
-                    ▼
-        ┌───────────────────────────────────────┐
-        │  Aurora PostgreSQL Serverless v2      │
-        │  pgvector (cosine similarity)         │
-        │  Row-Level Security (per-tenant RLS)  │
-        └───────────────────────────────────────┘
-```
+![Sift architecture diagram](https://raw.githubusercontent.com/joshblair/sift/main/docs/diagrams/sift-diagram-architecture.png)
 
 Let's go through each choice.
 

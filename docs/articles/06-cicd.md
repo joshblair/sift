@@ -1,3 +1,12 @@
+---
+title: "Zero-Secret CI/CD: GitHub Actions + OIDC on AWS (Part 6)"
+published: false
+description: "No AWS_ACCESS_KEY_ID in your GitHub secrets. Ever. Here's how OIDC trust works and why it's strictly better."
+tags: github, aws, devops, cicd
+series: "Building Sift: A Multi-Tenant AI Platform on AWS"
+cover_image: https://raw.githubusercontent.com/joshblair/sift/main/docs/diagrams/sift-diagram-architecture.png
+---
+
 # Zero-Secret CI/CD: GitHub Actions + OIDC on AWS (Part 6)
 
 *No `AWS_ACCESS_KEY_ID` in your GitHub secrets. Ever. Here's how OIDC trust works and why it's strictly better.*
