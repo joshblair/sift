@@ -6,6 +6,9 @@ Parameters:
     Type: String
     AllowedValues: [dev, prod]
     Default: dev
+  CertificateArn:
+    Type: String
+    Description: ACM certificate ARN for sift.bonefishsoftware.com (must be in us-east-1)
 
 Resources:
 
@@ -37,6 +40,12 @@ Resources:
         DefaultRootObject: index.html
         HttpVersion:       http2
         PriceClass:        PriceClass_100   # US + Europe + Asia (~$0/mo at low traffic)
+        Aliases:
+          - sift.bonefishsoftware.com
+        ViewerCertificate:
+          AcmCertificateArn:      !Ref CertificateArn
+          SslSupportMethod:       sni-only
+          MinimumProtocolVersion: TLSv1.2_2021
         Origins:
           - Id:         S3Origin
             DomainName: !GetAtt FrontendBucket.RegionalDomainName
@@ -77,6 +86,17 @@ Resources:
             Condition:
               StringEquals:
                 AWS:SourceArn: !Sub arn:aws:cloudfront::${AWS::AccountId}:distribution/${CloudFrontDistribution}
+
+  SiftDnsRecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneName: bonefishsoftware.com.
+      Name: sift.bonefishsoftware.com.
+      Type: A
+      AliasTarget:
+        DNSName:              !GetAtt CloudFrontDistribution.DomainName
+        HostedZoneId:         Z2FDTNDATAQYW2   # CloudFront's global hosted zone ID
+        EvaluateTargetHealth: false
 
 Outputs:
   FrontendBucketName:

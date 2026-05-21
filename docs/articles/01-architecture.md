@@ -167,7 +167,7 @@ This series covers each major subsystem in depth:
 - **Part 5:** The React frontend — polling patterns, Amplify auth integration, the upload flow
 - **Part 6:** CI/CD with GitHub Actions and OIDC — zero-secret deployments to AWS
 
-The live demo is running at [d3dsn1f23yg4bo.cloudfront.net](https://d3dsn1f23yg4bo.cloudfront.net) — log in with the shared Acme Corp credentials from the README and try uploading a PDF.
+The live demo is running at [sift.bonefishsoftware.com](https://sift.bonefishsoftware.com) — log in with the shared Acme Corp credentials from the README and try uploading a PDF.
 
 The code is at [github.com/joshblair/sift](https://github.com/joshblair/sift).
 
