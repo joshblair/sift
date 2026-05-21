@@ -41,6 +41,7 @@ That one flag makes the bucket publish `Object Created` events to the default Ev
 
 **Hop 2: EventBridge to Step Functions.** An EventBridge rule matches those events and triggers the state machine:
 
+{% raw %}
 ```yaml
 S3UploadRule:
   Type: AWS::Events::Rule
@@ -61,6 +62,7 @@ S3UploadRule:
             bucket: "$.detail.bucket.name"
           InputTemplate: '{"s3Key": "<key>", "bucketName": "<bucket>"}'
 ```
+{% endraw %}
 
 The `InputTransformer` is doing something important: it reshapes the raw S3 event (which has a lot of noise — checksums, ETags, content type) into a clean minimal payload before Step Functions even sees it. The state machine starts with just `{ s3Key, bucketName }`.
 
