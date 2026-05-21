@@ -360,7 +360,7 @@ That's all six parts:
 | 5 | React frontend — Amplify auth, presigned upload, React Query polling |
 | 6 | CI/CD — OIDC federation, SAM build/deploy, CloudFront cache strategy |
 
-The live demo is at [d3dsn1f23yg4bo.cloudfront.net](https://d3dsn1f23yg4bo.cloudfront.net). The code is at [github.com/joshblair/sift](https://github.com/joshblair/sift).
+The live demo is at [sift.bonefishsoftware.com](https://sift.bonefishsoftware.com). The code is at [github.com/joshblair/sift](https://github.com/joshblair/sift).
 
 ---
 
