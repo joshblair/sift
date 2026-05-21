@@ -1117,16 +1117,16 @@
       ],
       "lastCommittedPoint": null,
       "startBinding": {
-        "mode": "orbit",
         "elementId": "rect-browser",
+        "mode": "orbit",
         "fixedPoint": [
           0.4959948934060485,
           0.4959948934060486
         ]
       },
       "endBinding": {
-        "mode": "orbit",
         "elementId": "rect-cloudfront",
+        "mode": "orbit",
         "fixedPoint": [
           0.4959950726584594,
           0.5040049273415401
@@ -1304,16 +1304,16 @@
       ],
       "lastCommittedPoint": null,
       "startBinding": {
-        "mode": "orbit",
         "elementId": "rect-cognito",
+        "mode": "orbit",
         "fixedPoint": [
           0.5001,
           0.5001
         ]
       },
       "endBinding": {
-        "mode": "orbit",
         "elementId": "rect-apigw",
+        "mode": "orbit",
         "fixedPoint": [
           0.5001,
           0.5001
@@ -1401,16 +1401,16 @@
       ],
       "lastCommittedPoint": null,
       "startBinding": {
-        "mode": "orbit",
         "elementId": "rect-browser",
+        "mode": "orbit",
         "fixedPoint": [
           0.5001,
           0.5001
         ]
       },
       "endBinding": {
-        "mode": "orbit",
         "elementId": "rect-apigw",
+        "mode": "orbit",
         "fixedPoint": [
           0.5001,
           0.5001
@@ -1498,16 +1498,16 @@
       ],
       "lastCommittedPoint": null,
       "startBinding": {
-        "mode": "orbit",
         "elementId": "rect-apigw",
+        "mode": "orbit",
         "fixedPoint": [
           0.5733424631145073,
           0.4266575368854932
         ]
       },
       "endBinding": {
-        "mode": "orbit",
         "elementId": "rect-chatfn",
+        "mode": "orbit",
         "fixedPoint": [
           0,
           0.5001
@@ -1557,16 +1557,16 @@
       ],
       "lastCommittedPoint": null,
       "startBinding": {
-        "mode": "orbit",
         "elementId": "rect-chatfn",
+        "mode": "orbit",
         "fixedPoint": [
           0.7708062935481725,
           0.7708062935481724
         ]
       },
       "endBinding": {
-        "mode": "orbit",
         "elementId": "rect-bedrock",
+        "mode": "orbit",
         "fixedPoint": [
           0,
           1.19
@@ -1655,8 +1655,8 @@
       "lastCommittedPoint": null,
       "startBinding": null,
       "endBinding": {
-        "mode": "orbit",
         "elementId": "rect-aurora",
+        "mode": "orbit",
         "fixedPoint": [
           0.3571428571428572,
           0.6428571428571422
@@ -1744,16 +1744,16 @@
       ],
       "lastCommittedPoint": null,
       "startBinding": {
-        "mode": "orbit",
         "elementId": "rect-bedrock",
+        "mode": "orbit",
         "fixedPoint": [
           0.5001,
           0.5001
         ]
       },
       "endBinding": {
-        "mode": "orbit",
         "elementId": "rect-aurora",
+        "mode": "orbit",
         "fixedPoint": [
           0.5001,
           0.5001
@@ -1803,16 +1803,16 @@
       ],
       "lastCommittedPoint": null,
       "startBinding": {
-        "mode": "orbit",
         "elementId": "rect-browser",
+        "mode": "orbit",
         "fixedPoint": [
           0.49658048995522547,
           0.5034195100447745
         ]
       },
       "endBinding": {
-        "mode": "orbit",
         "elementId": "rect-s3uploads",
+        "mode": "orbit",
         "fixedPoint": [
           0.4965804469273743,
           0.49658044692737474
@@ -1900,16 +1900,16 @@
       ],
       "lastCommittedPoint": null,
       "startBinding": {
-        "mode": "orbit",
         "elementId": "rect-s3uploads",
+        "mode": "orbit",
         "fixedPoint": [
           0.5001,
           0.5001
         ]
       },
       "endBinding": {
-        "mode": "orbit",
         "elementId": "rect-eventbridge",
+        "mode": "orbit",
         "fixedPoint": [
           0.5001,
           0.5001
@@ -1997,16 +1997,16 @@
       ],
       "lastCommittedPoint": null,
       "startBinding": {
-        "mode": "orbit",
         "elementId": "rect-eventbridge",
+        "mode": "orbit",
         "fixedPoint": [
           0.5001,
           0.5001
         ]
       },
       "endBinding": {
-        "mode": "orbit",
         "elementId": "rect-sf",
+        "mode": "orbit",
         "fixedPoint": [
           0.4998813336631235,
           0.49988133366312365
@@ -2193,7 +2193,7 @@
     {
       "id": "text-section-2",
       "type": "text",
-      "x": 129,
+      "x": 140,
       "y": 490,
       "width": 200,
       "height": 18,
@@ -2209,11 +2209,11 @@
       "frameId": null,
       "roundness": null,
       "seed": 200053,
-      "version": 379,
-      "versionNonce": 190344936,
+      "version": 390,
+      "versionNonce": 1829266072,
       "isDeleted": false,
       "boundElements": [],
-      "updated": 1779293350961,
+      "updated": 1779299787365,
       "link": null,
       "locked": false,
       "text": "② ASYNC PIPELINE",
