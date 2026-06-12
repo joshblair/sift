@@ -31,9 +31,19 @@ export function useUploadDocument() {
       const ext      = file.name.split('.').pop()?.toLowerCase() ?? 'txt'
       const { uploadUrl, documentId } = await documentsApi.getUploadUrl(file.name, ext)
 
+      const MIME: Record<string, string> = {
+        pdf:  'application/pdf',
+        docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        csv:  'text/csv',
+        txt:  'text/plain',
+        md:   'text/markdown',
+      }
+
       // PUT directly to S3 presigned URL — bypasses API Gateway
+      // Use our own MIME map instead of file.type: browsers report .md as "" or text/plain,
+      // which causes S3 to reject the PUT when it doesn't match the presigned URL's Content-Type.
       await axios.put(uploadUrl, file, {
-        headers: { 'Content-Type': file.type },
+        headers: { 'Content-Type': MIME[ext] ?? 'application/octet-stream' },
       })
 
       return documentId
