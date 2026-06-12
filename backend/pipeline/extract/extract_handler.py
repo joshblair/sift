@@ -35,7 +35,7 @@ def handler(event: dict, context) -> dict:
         text, page_count = _extract_docx(content)
     elif ext == "csv":
         text, page_count = _extract_csv(content)
-    elif ext == "txt":
+    elif ext in ("txt", "md"):
         text       = content.decode("utf-8", errors="replace")
         page_count = 1
     else:

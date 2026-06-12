@@ -28,6 +28,26 @@ class TestExtractHandler:
         assert result["pageCount"]  == 1
         assert "Hello world" in result["text"]
 
+    def test_md_extraction(self):
+        from extract_handler import handler
+
+        s3_content = b"# Title\n\nSome **markdown** content."
+        event = {
+            "s3Key":      "tenant-1/doc-2/readme.md",
+            "bucketName": "test-bucket",
+        }
+
+        with patch("extract_handler.s3_client") as mock_s3, \
+             patch("extract_handler._mark_processing"):
+            mock_s3.get_object.return_value = {"Body": MagicMock(read=lambda: s3_content)}
+            result = handler(event, None)
+
+        assert result["tenantId"]   == "tenant-1"
+        assert result["documentId"] == "doc-2"
+        assert result["filename"]   == "readme.md"
+        assert result["pageCount"]  == 1
+        assert "markdown" in result["text"]
+
     def test_unsupported_extension_raises(self):
         from extract_handler import handler
 

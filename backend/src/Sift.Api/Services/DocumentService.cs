@@ -149,6 +149,7 @@ public class DocumentService(DbConnectionFactory db) : IDocumentService
         "docx" => "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         "csv"  => "text/csv",
         "txt"  => "text/plain",
+        "md"   => "text/markdown",
         _      => "application/octet-stream"
     };
 }

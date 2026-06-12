@@ -67,7 +67,7 @@ public class DocumentsFunction
         if (body is null || string.IsNullOrWhiteSpace(body.Filename) || string.IsNullOrWhiteSpace(body.FileType))
             return ApiResponse.BadRequest("filename and fileType are required");
 
-        var validTypes = new[] { "pdf", "docx", "csv", "txt" };
+        var validTypes = new[] { "pdf", "docx", "csv", "txt", "md" };
         if (!validTypes.Contains(body.FileType.ToLower()))
             return ApiResponse.BadRequest($"fileType must be one of: {string.Join(", ", validTypes)}");
 

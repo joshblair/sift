@@ -5,8 +5,9 @@ import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
 
 const ACCEPTED = { 'application/pdf': ['.pdf'], 'text/plain': ['.txt'], 'text/csv': ['.csv'],
-  'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'] }
-const ACCEPTED_EXT = ['.pdf', '.txt', '.csv', '.docx']
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
+  'text/markdown': ['.md'] }
+const ACCEPTED_EXT = ['.pdf', '.txt', '.csv', '.docx', '.md']
 
 interface UploadDropzoneProps {
   onUpload: (file: File) => Promise<void>
@@ -72,7 +73,7 @@ export function UploadDropzone({ onUpload }: UploadDropzoneProps) {
               />
             </label>
           </p>
-          <p className="mt-1 text-xs text-slate-400">PDF, DOCX, CSV, TXT</p>
+          <p className="mt-1 text-xs text-slate-400">PDF, DOCX, CSV, TXT, MD</p>
         </>
       )}
 
