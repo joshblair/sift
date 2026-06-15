@@ -337,4 +337,8 @@ The code for this post:
 
 ---
 
+**[Part 7](./07-markdown-support.md)** adds Markdown file support and covers the browser `file.type` reliability bug that surfaced during the work — `file.type` for `.md` files returns an empty string in Chrome, causing S3 presigned URL validation to fail. The fix replaces `file.type` with an explicit extension-to-MIME map, which applies to the upload hook covered in this post.
+
+---
+
 *Part of the Sift series: building a production-ready multi-tenant RAG platform on AWS.*

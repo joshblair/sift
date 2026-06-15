@@ -2,7 +2,7 @@
 
 > Ask questions about your documents. Get answers with citations, backed by your own data.
 
-Sift is a production-architected, multi-tenant RAG (Retrieval-Augmented Generation) platform built entirely on AWS-native services. Upload PDFs, Word docs, CSVs, or text files — Sift extracts, chunks, embeds, and indexes them so you can chat with your document library using natural language.
+Sift is a production-architected, multi-tenant RAG (Retrieval-Augmented Generation) platform built entirely on AWS-native services. Upload PDFs, Word docs, CSVs, text files, or Markdown files — Sift extracts, chunks, embeds, and indexes them so you can chat with your document library using natural language.
 
 Built as a portfolio demonstration of full-stack AI/cloud engineering: serverless compute, vector search, streaming pipelines, multi-tenant data isolation, and zero-secret CI/CD.
 
@@ -19,7 +19,7 @@ The demo environment runs in a shared tenant (Acme Corp). Documents you upload a
 ## What It Does
 
 ### Upload
-Drop a PDF, DOCX, CSV, or TXT file into the document library. Sift generates a presigned S3 URL and uploads directly from your browser — the API server never touches your file bytes.
+Drop a PDF, DOCX, CSV, TXT, or Markdown (.md) file into the document library. Sift generates a presigned S3 URL and uploads directly from your browser — the API server never touches your file bytes.
 
 ### Process
 An event-driven pipeline kicks off automatically on upload:
@@ -224,6 +224,7 @@ This project is documented in a six-part series covering the engineering decisio
 4. [RAG with pgvector](docs/articles/04-rag-pgvector.md) — embeddings, cosine search, and citations
 5. [React Frontend](docs/articles/05-react-frontend.md) — document library, chat UI, and polling
 6. [Zero-Secret CI/CD](docs/articles/06-cicd.md) — GitHub Actions + OIDC, no stored credentials
+7. [Adding Markdown Support](docs/articles/07-markdown-support.md) — wiring a new file type end-to-end across the stack
 
 ---
 
@@ -235,7 +236,7 @@ backend/
   src/Sift.Api.Tests/        xUnit + Moq unit tests
   pipeline/
     layers/shared/           Python Lambda Layer (db.py, bedrock.py)
-    extract/                 Text extraction (PDF, DOCX, CSV, TXT)
+    extract/                 Text extraction (PDF, DOCX, CSV, TXT, MD)
     chunk/                   Sliding-window chunker with overlap
     embed/                   Bedrock Titan Embed v2 → pgvector insert
     metadata/                Claude Haiku — summary + topics
@@ -256,6 +257,7 @@ infrastructure/
   parameters/                dev.json, prod.json
 migrations/
   001_initial_schema.sql     pgvector, tenants, users, documents, chunks, RLS
+  002_add_md_file_type.sql   Adds 'md' to documents file_type check constraint
 scripts/
   bootstrap.sh               One-time OIDC role + SAM bucket setup
   migrate-local.py           Run migrations via RDS Data API (no VPN needed)
