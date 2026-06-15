@@ -410,7 +410,7 @@ The code for this post:
 
 ---
 
-**[Part 7](./07-markdown-support.md)** walks through what it takes to add a new file type end-to-end — using Markdown support as the example. The extraction change is a one-liner, but the full change touches six files across four layers and surfaces a subtle browser MIME type bug along the way.
+**[Part 7](https://dev.to/josh_blair/adding-markdown-support-end-to-end-part-7-24g1)** walks through what it takes to add a new file type end-to-end — using Markdown support as the example. The extraction change is a one-liner, but the full change touches six files across four layers and surfaces a subtle browser MIME type bug along the way.
 
 ---
 
