@@ -1,6 +1,6 @@
 ---
 title: "Adding Markdown Support End-to-End (Part 7)"
-published: false
+published: true
 description: "What it actually takes to wire a new file type through a layered RAG stack — validation, extraction, MIME quirks, and a schema migration."
 tags: aws, serverless, python, architecture
 series: "Building Sift: A Multi-Tenant AI Platform on AWS"
@@ -221,9 +221,9 @@ Each layer is independently responsible for its concern. The checklist is mechan
 
 ## Links
 
-- [Part 1: Architecture Overview](./01-architecture.md)
-- [Part 2: Multi-Tenant Auth](./02-auth-multitenant.md)
-- [Part 3: Document Pipeline](./03-step-functions-pipeline.md)
-- [Part 4: RAG with pgvector](./04-rag-pgvector.md)
-- [Part 5: React Frontend](./05-react-frontend.md)
-- [Part 6: Zero-Secret CI/CD](./06-cicd.md)
+- [Part 1: Architecture Overview](https://dev.to/josh_blair/building-a-multi-tenant-ai-document-platform-on-aws-part-1-architecture-16fi)
+- [Part 2: Multi-Tenant Auth](https://dev.to/josh_blair/multi-tenant-auth-with-cognito-and-postgresql-row-level-security-part-2-5d30)
+- [Part 3: Document Pipeline](https://dev.to/josh_blair/serverless-document-pipelines-with-aws-step-functions-part-3-2111)
+- [Part 4: RAG with pgvector](https://dev.to/josh_blair/rag-and-vector-search-with-pgvector-and-amazon-bedrock-part-4-5294)
+- [Part 5: React Frontend](https://dev.to/josh_blair/building-the-react-frontend-document-library-and-chat-ui-part-5-22li)
+- [Part 6: Zero-Secret CI/CD](https://dev.to/josh_blair/zero-secret-cicd-github-actions-oidc-on-aws-part-6-22e7)
