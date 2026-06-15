@@ -22,7 +22,7 @@ This is the first post in a six-part series. Here I'll walk through the overall 
 
 ## What Sift Does
 
-Users upload documents — PDF, DOCX, CSV, or plain text. Sift processes them asynchronously through a six-stage pipeline, generating text embeddings and storing them in a vector database. Users then ask natural language questions, and Sift retrieves the most relevant chunks from their documents and feeds them to a Claude model to generate a grounded answer with numbered citations linking back to the source text.
+Users upload documents — PDF, DOCX, CSV, plain text, or Markdown. Sift processes them asynchronously through a six-stage pipeline, generating text embeddings and storing them in a vector database. Users then ask natural language questions, and Sift retrieves the most relevant chunks from their documents and feeds them to a Claude model to generate a grounded answer with numbered citations linking back to the source text.
 
 It's a legitimate enterprise use case: internal knowledge bases, contract review, research assistants. The architecture reflects that — it's not a demo that would fall apart the moment a second organization tried to use it.
 
@@ -165,6 +165,7 @@ This series covers each major subsystem in depth:
 - **[Part 4](https://dev.to/josh_blair/rag-and-vector-search-with-pgvector-and-amazon-bedrock-part-4-5294):** RAG and vector search — chunking strategy, pgvector queries, and how citations are generated
 - **[Part 5](https://dev.to/josh_blair/building-the-react-frontend-document-library-and-chat-ui-part-5-22li):** The React frontend — polling patterns, Amplify auth integration, the upload flow
 - **[Part 6](https://dev.to/josh_blair/zero-secret-cicd-github-actions-oidc-on-aws-part-6-22e7):** CI/CD with GitHub Actions and OIDC — zero-secret deployments to AWS
+- **[Part 7](https://dev.to/josh_blair/adding-markdown-support-end-to-end-part-7-24g1):** Adding Markdown support — wiring a new file type end-to-end across the stack (validation, extraction, MIME quirks, and a schema migration)
 
 The live demo is running at [sift.bonefishsoftware.com](https://sift.bonefishsoftware.com) — log in with the shared Acme Corp credentials from the README and try uploading a PDF.
 
